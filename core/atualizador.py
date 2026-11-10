@@ -39,6 +39,12 @@ def mais_nova(a: str, b: str) -> bool:
     return _v(a) > _v(b)
 
 
+def pasta_temporaria() -> bool:
+    """True se o programa está rodando de dentro de um zip aberto / pasta Temp do Windows."""
+    p = str(RAIZ).lower().replace("/", "\\")
+    return "\\appdata\\local\\temp\\" in p or ".zip" in p
+
+
 def _ignorar(rel: str) -> bool:
     rel = rel.replace("\\", "/")
     return (not rel or rel.endswith("/") or any(rel.startswith(p) or f"/{p}" in f"/{rel}" for p in IGNORAR)
@@ -152,7 +158,19 @@ def instalar_zip(dados: bytes, log=print, fazer_backup: bool = True) -> dict:
             destino.parent.mkdir(parents=True, exist_ok=True)
             tmp = destino.with_name(destino.name + ".novo")
             tmp.write_bytes(z.read(info))
-            os.replace(tmp, destino)
+            if destino.exists():
+                try:
+                    os.chmod(destino, 0o666)   # tira o "somente leitura" do arquivo antigo
+                except OSError:
+                    pass
+            try:
+                os.replace(tmp, destino)
+            except PermissionError:
+                tmp.unlink(missing_ok=True)
+                raise RuntimeError(
+                    f"O Windows não deixou trocar o arquivo {rel}. "
+                    + ("O programa está numa pasta temporária (dentro do zip). Mova-o para uma pasta fixa — veja o aviso vermelho no topo."
+                       if pasta_temporaria() else "Feche outros programas que usem essa pasta e tente de novo."))
             n += 1
         log(f"{n} arquivos atualizados.")
     req_depois = (RAIZ / "requirements.txt").read_text(encoding="utf-8") if (RAIZ / "requirements.txt").exists() else ""

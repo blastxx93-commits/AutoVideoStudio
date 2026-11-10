@@ -201,6 +201,17 @@ def _consertar_atalhos():
 
 _consertar_atalhos()
 
+from core import atualizador as _AT  # noqa: E402
+if _AT.pasta_temporaria():
+    st.error(
+        "⚠️ **O programa está rodando de uma pasta temporária do Windows** (dentro do arquivo .zip). "
+        "O Windows pode apagar essa pasta a qualquer momento, junto com as suas chaves e projetos, e as "
+        "atualizações não conseguem ser instaladas.\n\n"
+        "**Como resolver:** feche o programa → abra a pasta abaixo no Explorador de Arquivos → copie a pasta "
+        "**AutoVideoStudio** inteira para **Documentos** → dentro da nova pasta, dê dois cliques no **INSTALAR** → "
+        "use o atalho novo da Área de Trabalho.\n\n"
+        f"Pasta atual: `{_AT.RAIZ}`")
+
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def _checar_atualizacao(repo: str) -> dict:
