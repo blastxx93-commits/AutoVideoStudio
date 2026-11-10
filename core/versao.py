@@ -1,7 +1,10 @@
 """Versão do programa. A cada atualização publicada, o número sobe e as novidades vão em NOVIDADES."""
-VERSAO = "2.1.0"
+VERSAO = "2.1.1"
 
 NOVIDADES = {
+    "2.1.1": [
+        "Ícone com o logo do AutoVideo Studio na Área de Trabalho (conserta atalhos antigos sozinho)",
+    ],
     "2.1.0": [
         "Atualização automática dentro do programa (sem extrair pasta)",
         "Base de canais com cartões no Buscador de Nichos",

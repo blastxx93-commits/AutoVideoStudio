@@ -181,6 +181,27 @@ if _novo != st.session_state["tema"]:
 st.sidebar.markdown('<div class="av-side-foot">Roteiro + título → vídeo pronto.<br>'
                     'Tudo roda no seu PC; só as APIs que você escolher são pagas.<br><br>'
                     f'<b>AutoVideo Studio</b> · versão {VERSAO}</div>', unsafe_allow_html=True)
+def _consertar_atalhos():
+    """Uma vez por versão: recria o atalho com o logo e coloca o logo nos atalhos antigos da Área de Trabalho."""
+    marca = C.DATA_DIR / "atalhos_v2.ok"
+    if os.name != "nt" or marca.exists() or st.session_state.get("_atalhos_tentado"):
+        return
+    st.session_state["_atalhos_tentado"] = True
+    import subprocess
+    import sys as _sys
+    raiz = Path(__file__).resolve().parent
+    py = Path(_sys.executable)
+    if py.name.lower() == "pythonw.exe" and (py.parent / "python.exe").exists():
+        py = py.parent / "python.exe"
+    try:
+        subprocess.Popen([str(py), str(raiz / "criar_atalhos.py")], cwd=str(raiz), creationflags=0x08000000)
+    except Exception:
+        pass
+
+
+_consertar_atalhos()
+
+
 @st.cache_data(ttl=1800, show_spinner=False)
 def _checar_atualizacao(repo: str) -> dict:
     """Procura versão nova no máximo a cada 30 minutos (resposta rápida, até 4 s)."""
@@ -2467,6 +2488,16 @@ def secao_atualizacao(s):
                 st.rerun()
             except Exception as e:
                 st.error(str(e))
+        if os.name == "nt" and st.button("🖼️ Recriar o atalho da Área de Trabalho com o logo"):
+            import subprocess
+            import sys as _sys
+            raiz = Path(__file__).resolve().parent
+            py = Path(_sys.executable)
+            if py.name.lower() == "pythonw.exe" and (py.parent / "python.exe").exists():
+                py = py.parent / "python.exe"
+            r = subprocess.run([str(py), str(raiz / "criar_atalhos.py")], cwd=str(raiz), capture_output=True,
+                               text=True, creationflags=0x08000000)
+            st.success("Atalho recriado com o logo.") if r.returncode == 0 else st.error(r.stdout + r.stderr)
         if NOVIDADES.get(VERSAO):
             st.markdown(f"**Novidades da versão {VERSAO}:** " + " · ".join(NOVIDADES[VERSAO]))
 
